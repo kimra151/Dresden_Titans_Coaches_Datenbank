@@ -1,0 +1,14 @@
+{
+  "name": "coaches_hub-root",
+  "private": true,
+  "scripts": {
+    "vault:start": "docker compose up -d",
+    "vault:stop": "docker compose down",
+    "vault:logs": "docker compose logs -f",
+    "vault:restart": "docker compose restart",
+    "db:sync": "docker compose exec backend npx prisma db push",
+    "db:ui": "docker compose exec backend npx prisma studio",
+    "install:portal": "docker compose exec frontend npm install",
+    "install:api": "docker compose exec backend npm install"
+  }
+}

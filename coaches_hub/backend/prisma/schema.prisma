@@ -1,0 +1,40 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Definiert feste Rollen im System, um Tippfehler zu vermeiden
+enum Role {
+  ADMIN
+  COACH
+  PLAYER
+}
+
+model User {
+  id        String   @id // Wichtig: Hier nutzen wir später die ID, die Supabase beim Login generiert
+  email     String   @unique
+  firstName String
+  lastName  String
+  role      Role     @default(COACH)
+  team      String?  // Hier kannst du eintragen, ob jemand zur U13 oder U14 gehört
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BasketballDrill {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  videoS3Key   String   
+  teamCategory String   
+  drillType    String   
+  durationSecs Int      
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([teamCategory, drillType])
+}
