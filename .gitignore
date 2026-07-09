@@ -1,8 +1,175 @@
-cat <<EOT >> .gitignore
-node_modules/
-.next/
-out/
-build/
-.env*.local
-dist/
-EOT
+# ============================================
+# DEPENDENCIES (nie ins Image kopieren!)
+# ============================================
+**/node_modules
+**/.pnpm-store
+**/.yarn
+**/.npm
+**/bower_components
+
+# ============================================
+# BUILD ARTIFACTS (werden im Container neu gebaut)
+# ============================================
+**/dist
+**/build
+**/.next
+**/.turbo
+**/.nuxt
+**/.output
+**/.vercel
+**/.netlify
+
+# ============================================
+# GIT & VERSION CONTROL
+# ============================================
+.git
+.gitignore
+.gitattributes
+.github
+.gitlab-ci.yml
+
+# ============================================
+# IDE & EDITOR
+# ============================================
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings
+
+# ============================================
+# OS FILES
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ============================================
+# DOCKER FILES (nie ins Image kopieren!)
+# ============================================
+**/Dockerfile*
+**/docker-compose*.yml
+**/.dockerignore
+**/.docker
+
+# ============================================
+# DOCUMENTATION (spart Platz)
+# ============================================
+**/*.md
+**/README*
+**/CHANGELOG*
+**/LICENSE
+**/docs
+**/doc
+**/guides
+**/tutorials
+
+# ============================================
+# TESTS & COVERAGE
+# ============================================
+**/coverage
+**/.nyc_output
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.test.js
+**/*.spec.ts
+**/*.spec.tsx
+**/*.spec.js
+**/jest.config.*
+**/vitest.config.*
+**/cypress
+**/playwright
+
+# ============================================
+# LOGS
+# ============================================
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/logs
+**/.logs
+
+# ============================================
+# ENVIRONMENT (SECURITY!)
+# ============================================
+**/.env
+**/.env.*
+**/.env.local
+**/.env.development
+**/.env.production
+**/.env.test
+!**/.env.example
+
+# ============================================
+# BACKUP & TEMP
+# ============================================
+**/backup_*
+**/*.bak
+**/*.backup
+**/*.tmp
+**/*.temp
+**/.temp
+**/.cache
+**/.eslintcache
+**/.prettiercache
+
+# ============================================
+# SECRETS & KEYS
+# ============================================
+**/*.pem
+**/*.key
+**/*.cert
+**/*.crt
+**/secrets
+**/.secrets
+
+# ============================================
+# DATABASE
+# ============================================
+**/postgres_data
+**/.volumes
+**/*.sql.bak
+**/migrations/**/*.sql.bak
+
+# ============================================
+# MEDIA & ASSETS (zu groß für Images)
+# ============================================
+**/*.mp4
+**/*.mov
+**/*.avi
+**/*.mkv
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.tgz
+**/*.rar
+
+# ============================================
+# MONOREPO SPECIFIC
+# ============================================
+# Nur die nötigen Apps/Packages für jeden Build
+# (wird im Dockerfile gezielt kopiert)
+
+# ============================================
+# MISC
+# ============================================
+**/scratch
+**/tmp
+**/temp
+**/uploads
+**/downloads
+**/node_modules/**/test
+**/node_modules/**/tests
+**/node_modules/**/docs
+**/node_modules/**/examples
