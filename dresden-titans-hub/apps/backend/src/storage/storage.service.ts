@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3/dist-types';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner/dist-types';
 
 @Injectable()
 export class StorageService {

@@ -1,0 +1,19 @@
+{
+  "name": "@dresden-titans/database",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.15.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.15.0",
+    "typescript": "^5.4.0"
+  }
+}
