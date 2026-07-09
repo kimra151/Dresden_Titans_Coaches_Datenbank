@@ -1,0 +1,31 @@
+{
+  "name": "@dresden-titans/ui",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src/",
+    "clean": "rm -rf .turbo node_modules dist"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.0"
+  },
+  "devDependencies": {
+    "@dresden-titans/config": "workspace:*",
+    "@dresden-titans/config": "workspace:*",
+    "eslint": "^8.57.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./button": "./src/components/Button.tsx",
+    "./card": "./src/components/Card.tsx"
+  }
+}

@@ -2,49 +2,42 @@
   "name": "dresden-titans-hub",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=11.0.0"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "test": "turbo run test",
+    "lint:fix": "turbo run lint:fix",
     "type-check": "turbo run type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "db:generate": "turbo run db:generate",
     "db:push": "turbo run db:push",
-    "db:migrate": "turbo run db:migrate",
+    "db:migrate:dev": "turbo run db:migrate:dev",
     "db:studio": "pnpm --filter @dresden-titans/database db:studio",
-    "db:seed": "pnpm --filter @dresden-titans/database db:seed",
-    "docker:prod": "docker compose --profile production up -d --build",
-    "docker:dev": "docker compose --profile development up -d --build",
-    "docker:full": "docker compose --profile full up -d --build",
-    "docker:down": "docker compose --profile production --profile development --profile full down",
-    "docker:logs": "docker compose logs -f --tail=100",
-    "docker:restart": "docker compose restart",
-    "docker:rebuild": "docker compose build --no-cache",
+    "prepare": "husky",
+    "preinstall": "npx only-allow pnpm",
+    "docker:dev": "docker compose --profile development up --build",
+    "docker:dev:down": "docker compose --profile development down",
+    "docker:prod": "docker compose --profile production up --build -d",
+    "docker:prod:down": "docker compose --profile production down",
+    "docker:full": "docker compose --profile full up --build -d",
+    "docker:full:down": "docker compose --profile full down",
     "docker:clean": "docker compose down -v --rmi all --remove-orphans",
-    "install:all": "pnpm install",
-    "prepare": "husky"
+    "docker:logs": "docker compose logs -f",
+    "docker:ps": "docker compose ps",
+    "docker:rebuild": "docker compose build --no-cache"
   },
   "devDependencies": {
-    "turbo": "^2.0.0",
-    "prettier": "^3.2.0",
-    "typescript": "^5.4.0",
-    "husky": "^9.0.0",
-    "lint-staged": "^15.2.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
-  },
-  "packageManager": "pnpm@9.0.0",
-  "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "@types/node": "^20.17.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.4.0",
+    "turbo": "^2.10.4",
+    "typescript": "^5.7.0"
   }
 }

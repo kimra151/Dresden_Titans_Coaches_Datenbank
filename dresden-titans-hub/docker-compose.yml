@@ -1,0 +1,278 @@
+# ============================================
+# ZENTRALE ENV-VARIABLEN (werden in .env definiert)
+# ============================================
+x-common-env: &common-env
+  NODE_ENV: ${NODE_ENV:-production}
+  TZ: Europe/Berlin
+
+x-backend-env: &backend-env
+  <<: *common-env
+  DATABASE_URL: ${DATABASE_URL}
+  SUPABASE_URL: ${SUPABASE_URL}
+  SUPABASE_KEY: ${SUPABASE_KEY}
+  SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY}
+  CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+  CLOUDFLARE_R2_ACCESS_KEY: ${CLOUDFLARE_R2_ACCESS_KEY}
+  CLOUDFLARE_R2_SECRET_KEY: ${CLOUDFLARE_R2_SECRET_KEY}
+  CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET}
+  JWT_SECRET: ${JWT_SECRET}
+
+x-frontend-env: &frontend-env
+  <<: *common-env
+  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+  NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+
+# ============================================
+# WIEDERVERWENDBARE KONFIGURATIONEN
+# ============================================
+x-default-deploy: &default-deploy
+  resources:
+    limits:
+      cpus: '1.0'
+      memory: 512M
+    reservations:
+      cpus: '0.25'
+      memory: 128M
+  restart_policy:
+    condition: unless-stopped
+    max_attempts: 3
+    window: 10s
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+    compress: "true"
+
+# ============================================
+# SERVICES
+# ============================================
+services:
+  # ==========================================
+  # BACKEND (NestJS)
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
+      target: ${BUILD_TARGET:-production}
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
+    image: dresden-titans/backend:${TAG:-latest}
+    container_name: dt-backend
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    environment:
+      <<: *backend-env
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      <<: *default-deploy
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 768M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      <<: *default-logging
+    networks:
+      - app-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "com.dresden-titans.service=backend"
+      - "com.dresden-titans.environment=${NODE_ENV:-production}"
+    profiles:
+      - production
+      - full
+
+  # ==========================================
+  # FRONTEND (Next.js)
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
+      target: ${BUILD_TARGET:-production}
+      args:
+        NODE_ENV: ${NODE_ENV:-production}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    image: dresden-titans/frontend:${TAG:-latest}
+    container_name: dt-frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    environment:
+      <<: *frontend-env
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      <<: *default-deploy
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      <<: *default-logging
+    networks:
+      - app-net
+    depends_on:
+      backend:
+        condition: service_healthy
+    labels:
+      - "com.dresden-titans.service=frontend"
+      - "com.dresden-titans.environment=${NODE_ENV:-production}"
+    profiles:
+      - production
+      - full
+
+  # ==========================================
+  # POSTGRES (nur für lokale Entwicklung)
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: dt-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-dresden_titans}
+      TZ: Europe/Berlin
+      PGTZ: Europe/Berlin
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-dresden_titans}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      <<: *default-logging
+    networks:
+      - app-net
+    profiles:
+      - development
+      - full
+
+  # ==========================================
+  # DEVELOPMENT-SERVICES (mit Hot-Reload)
+  # ==========================================
+  backend-dev:
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
+      target: development
+    image: dresden-titans/backend:dev
+    container_name: dt-backend-dev
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+    environment:
+      <<: *backend-env
+      NODE_ENV: development
+    env_file:
+      - .env
+    volumes:
+      - ./apps/backend:/app/apps/backend:cached
+      - ./packages:/app/packages:cached
+      - backend_node_modules:/app/node_modules
+      - backend_dist:/app/apps/backend/dist
+    command: pnpm --filter @dresden-titans/backend start:debug
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+    logging:
+      <<: *default-logging
+    networks:
+      - app-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - development
+
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
+      target: development
+    image: dresden-titans/frontend:dev
+    container_name: dt-frontend-dev
+    ports:
+      - "3001:3000"
+    environment:
+      <<: *frontend-env
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    env_file:
+      - .env
+    volumes:
+      - ./apps/frontend:/app/apps/frontend:cached
+      - ./packages:/app/packages:cached
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/apps/frontend/.next
+    command: pnpm --filter @dresden-titans/frontend dev
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+    logging:
+      <<: *default-logging
+    networks:
+      - app-net
+    depends_on:
+      - backend-dev
+    profiles:
+      - development
+
+# ============================================
+# VOLUMES (persistente Daten)
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  backend_node_modules:
+  backend_dist:
+  frontend_node_modules:
+  frontend_next:
+
+# ============================================
+# NETZWERKE (vereinfacht - alle Services kommunizieren)
+# ============================================
+networks:
+  app-net:
+    driver: bridge
