@@ -1,44 +1,71 @@
-# Dependencies
+# ==============================
+# Monorepo / Turborepo Specifics
+# ==============================
+# Das hier ist der wichtigste Teil für Turborepo!
 node_modules
+apps/*/node_modules
+packages/*/node_modules
+.turbo
+out
+
+# ==============================
+# Dependencies
+# ==============================
 .pnpm-store
 
+# ==============================
 # Build outputs
+# ==============================
 dist
 .next
 build
 
+# ==============================
 # Development files
+# ==============================
 *.log
 .DS_Store
 .env.local
 .env.development
 .env.test
 
+# ==============================
 # IDE
+# ==============================
 .vscode
 .idea
 *.swp
 *.swo
 
+# ==============================
 # Git
+# ==============================
 .git
 .gitignore
 
+# ==============================
 # Docker
+# ==============================
 Dockerfile
 docker-compose*.yml
 .docker
 
+# ==============================
 # Documentation
+# ==============================
 README.md
 CHANGELOG.md
 docs
 
+# ==============================
 # Test
+# ==============================
 coverage
 *.test.ts
 *.spec.ts
 __tests__
 
+# ==============================
 # Misc
+# ==============================
 turbo.log

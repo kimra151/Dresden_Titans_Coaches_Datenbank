@@ -6,7 +6,9 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint src/",
+    "dev": "tsc --watch",
+    "lint": "eslint src/ --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
     "clean": "rm -rf .turbo node_modules dist"
   },
   "dependencies": {
@@ -15,17 +17,14 @@
   },
   "devDependencies": {
     "@dresden-titans/config": "workspace:*",
-    "@dresden-titans/config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "eslint": "^8.57.0",
     "react": "^19.0.0",
     "typescript": "^5.7.0"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./button": "./src/components/Button.tsx",
-    "./card": "./src/components/Card.tsx"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
