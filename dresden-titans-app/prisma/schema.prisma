@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Deine Datenbank-URL (z.B. von Supabase, Neon oder Vercel Postgres)
+  url      = env("DATABASE_URL")
+}
+
+// --- TRAINER ---
+model User {
+  id          String     @id @default(cuid())
+  name        String
+  role        String     // z.B. "Headcoach U14"
+  avatar      String?    // Kürzel oder Bild-URL
+  
+  drills      Drill[]    // Drills, die dieser Trainer erstellt hat
+  playlists   Playlist[] // Playlists, die dieser Trainer besitzt
+  
+  createdAt   DateTime   @default(now())
+}
+
+// --- ÜBUNGEN / DRILLS ---
+model Drill {
+  id          String   @id @default(cuid())
+  title       String
+  category    String
+  level       String
+  duration    String
+  players     String
+  objective   String
+  
+  // Medien aus Cloudflare R2
+  videoUrl    String
+  posterImage String?
+
+  // Postgres Arrays für flache Listen (perfekt für Ablauf & Keypoints)
+  execution   String[] 
+  keyPoints   String[]
+  
+  // JSONB für strukturierte Einzeldaten
+  mistake     Json?    // Erwartet z.B. { "error": "...", "fix": "..." }
+  constraints String?
+
+  // Relationen
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  playlists   PlaylistDrill[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- PLAYLISTS ---
+model Playlist {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  visibility  String   @default("Private") // "Private" oder "Shared"
+  
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  drills      PlaylistDrill[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- MANY-TO-MANY RELATION (Playlists <-> Drills) ---
+// Wir nutzen eine explizite Verbindungstabelle, um die Reihenfolge
+// der Drills innerhalb einer Playlist (Drag & Drop!) speichern zu können.
+model PlaylistDrill {
+  playlistId  String
+  playlist    Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  
+  drillId     String
+  drill       Drill    @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  
+  order       Int      // WICHTIG: Bestimmt die Position in der Playlist
+  
+  @@id([playlistId, drillId])
+  @@index([playlistId, order])
+}
